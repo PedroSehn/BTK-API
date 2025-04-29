@@ -42,4 +42,34 @@ router.patch('/:id', async (req: Request, res: Response) => {
   }
 })
 
+router.put('/:id', async (req: Request, res: Response) => {
+  try{
+    const aluno = { ...req.body, id: Number(req.params.id) };
+    const atualizado = await Aluno.uptadeAluno(aluno);
+
+    if (!atualizado) {
+      res.status(404).json({ erro: 'Aluno não encontrado' });
+    }
+
+    res.status(200).json({ sucesso: true });
+  }catch(err: any){
+    res.status(500).json({erro: err.message})
+  }
+})
+
+router.patch('/alterarStatusPagamento/:id', async (req: Request, res: Response) => {
+  try{
+    const id = Number(req.params.id)
+    const atualizado = await Aluno.alterarStatusPagamento(id, req.body.statusPagamento)
+
+    if (!atualizado) {
+      res.status(404).json({ erro: 'Aluno não encontrado' });
+    }
+
+    res.status(200).json({ sucesso: true });
+  }catch(err: any){
+    res.status(500).json({erro: err.message})
+  }
+})
+
 export default router

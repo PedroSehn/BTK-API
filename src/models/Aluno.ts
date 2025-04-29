@@ -1,14 +1,19 @@
 import pool from '../db/connection.js'
 
 export interface IAluno {
+  id?: number,
   nome: string,
   telefone: string,
-  tipo_plano: string,
+  tipo_plano: 'mensal' | 'trimestral' | 'semestral' | 'anual',
   valor_plano: number,
-  status_pagamento: boolean,
+  status_pagamento: 'pago' | 'pendente',
 }
 
 export default {
+  async buscarTodosAlunos(){},
+
+  async buscarAlunoPorId(){},
+
   async criar(aluno: IAluno){
     const { nome, telefone, tipo_plano, valor_plano, status_pagamento } = aluno;
     const res = await pool.query(
@@ -39,7 +44,6 @@ export default {
     RETURNING id
   `;
 
-    console.log(setClause)
     const res = await pool.query(query, [id, ...valores]);
     if(res.rows) {
       return res.rows.length === 1
@@ -49,7 +53,34 @@ export default {
     
   },
 
-  async uptadeAluno(){},
+  async uptadeAluno(aluno: IAluno): Promise<boolean> {
+    const { id, nome, telefone, tipo_plano, valor_plano, status_pagamento } = aluno;
+    const res = await pool.query(
+      `UPDATE alunos
+      SET nome = $2,
+          telefone = $3,
+          tipo_plano = $4,
+          valor_plano = $5,
+          status_pagamento = $6
+      WHERE id = $1
+      RETURNING id`,
+      [id, nome, telefone, tipo_plano, valor_plano, status_pagamento])
+    
+    if (res.rows) {
+      return res.rows.length === 1
+    } else {
+      return false
+    }
 
-  async alterarStatusPagamento(){},
+  },
+
+  async alterarStatusPagamento(id: number, statusPagamento: boolean) : Promise<boolean>{
+    const query = 'UPDATE alunos SET status_pagamento = $2 WHERE id = $1 RETURNING id'
+    const res = await pool.query(query, [id, statusPagamento])
+    if(res.rows) {
+      return res.rows.length === 1
+    } else {
+      return false
+    }
+  },
 }

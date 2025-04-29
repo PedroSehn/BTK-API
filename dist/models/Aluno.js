@@ -1,5 +1,7 @@
 import pool from '../db/connection.js';
 export default {
+    async buscarTodosAlunos() { },
+    async buscarAlunoPorId() { },
     async criar(aluno) {
         const { nome, telefone, tipo_plano, valor_plano, status_pagamento } = aluno;
         const res = await pool.query(`INSERT INTO alunos 
@@ -23,7 +25,6 @@ export default {
     WHERE id = $1
     RETURNING id
   `;
-        console.log(setClause);
         const res = await pool.query(query, [id, ...valores]);
         if (res.rows) {
             return res.rows.length === 1;
@@ -32,6 +33,31 @@ export default {
             return false;
         }
     },
-    async uptadeAluno() { },
-    async alterarStatusPagamento() { },
+    async uptadeAluno(aluno) {
+        const { id, nome, telefone, tipo_plano, valor_plano, status_pagamento } = aluno;
+        const res = await pool.query(`UPDATE alunos
+      SET nome = $2,
+          telefone = $3,
+          tipo_plano = $4,
+          valor_plano = $5,
+          status_pagamento = $6
+      WHERE id = $1
+      RETURNING id`, [id, nome, telefone, tipo_plano, valor_plano, status_pagamento]);
+        if (res.rows) {
+            return res.rows.length === 1;
+        }
+        else {
+            return false;
+        }
+    },
+    async alterarStatusPagamento(id, statusPagamento) {
+        const query = 'UPDATE alunos SET status_pagamento = $2 WHERE id = $1 RETURNING id';
+        const res = await pool.query(query, [id, statusPagamento]);
+        if (res.rows) {
+            return res.rows.length === 1;
+        }
+        else {
+            return false;
+        }
+    },
 };
